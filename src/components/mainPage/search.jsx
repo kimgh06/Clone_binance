@@ -45,7 +45,7 @@ const Search = ({ coinlist }) => {
                 onClick={() => {
                   setQuery(coin.coin);
                   setActive(false);
-                  // setCoinName(coin.coin);
+                  setCoinName(coin.coin);
                 }}
               >
                 <p>{coin.coin}</p>
