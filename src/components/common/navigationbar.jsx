@@ -1,5 +1,5 @@
 import Image from "next/image";
-import NavigationButton from "./navigationButotn";
+import NavigationButton from "./navigationButton";
 
 export default function Navigationbar() {
   return (
@@ -10,7 +10,7 @@ export default function Navigationbar() {
           <h2>Coin Market</h2>
         </div>
       </div>
-      <div className="flex justify-around items-center w-1/6">
+      <div className="flex justify-around items-center gap-5">
         <NavigationButton>Login</NavigationButton>
         <NavigationButton>Sign up</NavigationButton>
       </div>
