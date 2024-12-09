@@ -7,6 +7,8 @@ import {
 import axiosClient from "./axiosClient";
 import Search from "@/components/mainPage/search";
 import Tradelist from "@/components/mainPage/orderbooklist";
+import FinancialChart from "@/components/mainPage/chart";
+import useWindowSize from "../hooks/getwindowsize";
 
 /**
  * Recoil has been not supported anymore.
@@ -41,6 +43,7 @@ function InnerHome() {
     queryKey: ["coinList"],
     queryFn: getCoinList,
   });
+  const { width } = useWindowSize();
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -48,7 +51,10 @@ function InnerHome() {
   return (
     <div className="p-36">
       <Search coinlist={coins} />
-      <Tradelist />
+      <div className={width > 1280 ? `flex justify-between` : ""}>
+        <FinancialChart />
+        <Tradelist />
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 export default function Orderbook({ price, amount, when }) {
-  const time = new Date(when).toLocaleTimeString();
+  const time = when ? new Date(when).toLocaleTimeString() : undefined;
   return (
     <div className="flex text-sm justify-between">
       <div>{amount}</div>

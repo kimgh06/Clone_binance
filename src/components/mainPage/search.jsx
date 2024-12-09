@@ -21,7 +21,7 @@ const Search = ({ coinlist }) => {
 
   return (
     <div
-      className="absolute top-32 w-svw left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+      className="absolute top-32 w-svw left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10"
       onFocus={() => setActive(true)}
     >
       <input
