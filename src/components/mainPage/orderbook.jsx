@@ -1,8 +1,10 @@
-export default function Orderbook({ price, quantity }) {
+export default function Orderbook({ price, amount, when }) {
+  const time = new Date(when).toLocaleTimeString();
   return (
-    <p className="flex text-sm justify-between">
-      <div>{quantity}</div>
+    <div className="flex text-sm justify-between">
+      <div>{amount}</div>
       <div>${price}</div>
-    </p>
+      {when && <div>{time}</div>}
+    </div>
   );
 }
