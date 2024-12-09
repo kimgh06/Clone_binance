@@ -1,7 +1,12 @@
 "use client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import axiosClient from "./axiosClient";
 import Search from "@/components/mainPage/search";
+import Tradelist from "@/components/mainPage/orderbooklist";
 
 /**
  * Recoil has been not supported anymore.
@@ -28,10 +33,22 @@ function InnerHome() {
       console.error(error);
     }
   };
-  const { data: coins, error, isLoading } = useQuery("coinList", getCoinList);
+  const {
+    data: coins,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["coinList"],
+    queryFn: getCoinList,
+  });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  return <Search coinlist={coins} />;
+  return (
+    <div className=" p-36">
+      <Search coinlist={coins} />
+      <Tradelist />
+    </div>
+  );
 }

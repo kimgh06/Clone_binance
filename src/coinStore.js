@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 const useCoinStore = create((set) => ({
-  coinName: "",
+  coinName: "BTC",
   setCoinName: (name) => set({ coinName: name }),
 }));
 

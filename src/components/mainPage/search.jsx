@@ -29,15 +29,15 @@ const Search = ({ coinlist }) => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search..."
-        className="border border-gray-300 rounded p-2 mb-4 w-full max-w-md text-black"
+        className="border border-gray-300 rounded p-2 w-full max-w-md text-black"
       />
-      <div className="max-w-md w-full overflow-y-scroll max-h-60">
-        {active && (
-          <>
-            <div className="flex justify-between">
-              <button onClick={() => setQuery("")}>Clear</button>
-              <button onClick={() => setActive(false)}>Close</button>
-            </div>
+      {active && (
+        <>
+          <div className="flex justify-between items-center max-w-md w-full p-2">
+            <button onClick={() => setQuery("")}>Clear</button>
+            <button onClick={() => setActive(false)}>Close</button>
+          </div>
+          <div className="max-w-md w-full overflow-y-scroll max-h-60 bg-gray-700">
             {options.map((coin) => (
               <div
                 key={coin.coin}
@@ -51,9 +51,9 @@ const Search = ({ coinlist }) => {
                 <p>{coin.coin}</p>
               </div>
             ))}
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
