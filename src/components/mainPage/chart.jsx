@@ -11,12 +11,14 @@ const FinancialChart = () => {
   const [isHovering, setIsHovering] = useState(false);
   const { coinName } = useCoinStore();
 
-  // Preprocess trades into candlestick format
-  const preprocessTrades = (trades, intervalMs = 1000) => {
+  // Preprocess trades into candlestick format by seconds
+  const preprocessTrades = (trades, intervalSeconds = 1) => {
     const grouped = {};
 
     trades.forEach((trade) => {
-      const interval = Math.floor(trade.time / intervalMs) * intervalMs;
+      const interval =
+        Math.floor(trade.time / (intervalSeconds * 1000)) *
+        (intervalSeconds * 1000);
 
       if (!grouped[interval]) {
         grouped[interval] = {
@@ -41,7 +43,7 @@ const FinancialChart = () => {
     });
 
     return Object.entries(grouped).map(([time, data]) => ({
-      time: Math.floor(time / 1000), // Convert to seconds (required by lightweight-charts)
+      time: Math.floor(time / 1000), // Convert to seconds
       ...data,
     }));
   };
@@ -52,12 +54,14 @@ const FinancialChart = () => {
   };
 
   useEffect(() => {
-    if (isHovering) return;
-    const intervalId = setInterval(getTradeList, 2000);
-
+    if (!coinName || isHovering) return;
+    const Interval = setInterval(() => {
+      getTradeList();
+    }, 2000);
     return () => {
-      clearInterval(intervalId);
-    }; // eslint-disable-next-line react-hooks/exhaustive-deps
+      clearInterval(Interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, coinName, isHovering]);
 
   useEffect(() => {
@@ -91,19 +95,19 @@ const FinancialChart = () => {
 
     candleSeries.setData(candlestickData);
 
-    // Optionally, add moving average lines (placeholder values)
-    const ma1hour = chart.addLineSeries({ color: "#ffeb3b", lineWidth: 2 });
-    const ma6hour = chart.addLineSeries({ color: "#ff5722", lineWidth: 2 });
-    const ma12hour = chart.addLineSeries({ color: "#9c27b0", lineWidth: 2 });
+    // Optionally, add moving average lines
+    const ma1Sec = chart.addLineSeries({ color: "#ffeb3b", lineWidth: 2 });
+    const ma5Sec = chart.addLineSeries({ color: "#ff5722", lineWidth: 2 });
+    const ma10Sec = chart.addLineSeries({ color: "#9c27b0", lineWidth: 2 });
 
-    // Example Moving Averages (dummy for illustration)
+    // Moving Averages
     const calculateMA = (candles, periodSeconds) => {
       const maData = [];
-      const periodMs = periodSeconds * 1000; // Convert hours to milliseconds
+      const periodMs = periodSeconds * 1000; // Convert seconds to milliseconds
 
       for (let i = 0; i < candles.length; i++) {
         const endTime = candles[i].time * 1000; // Convert seconds to milliseconds
-        const startTime = endTime - periodMs; // Define the start time for this period
+        const startTime = endTime - periodMs;
 
         // Find candles within the time window
         const relevantCandles = candles.filter(
@@ -112,7 +116,6 @@ const FinancialChart = () => {
         );
 
         if (relevantCandles.length > 0) {
-          // Calculate the average of the "close" prices in this time window
           const avg =
             relevantCandles.reduce((sum, candle) => sum + candle.close, 0) /
             relevantCandles.length;
@@ -124,9 +127,9 @@ const FinancialChart = () => {
       return maData;
     };
 
-    ma1hour.setData(calculateMA(candlestickData, 1));
-    ma6hour.setData(calculateMA(candlestickData, 6));
-    ma12hour.setData(calculateMA(candlestickData, 12));
+    ma1Sec.setData(calculateMA(candlestickData, 1));
+    ma5Sec.setData(calculateMA(candlestickData, 5));
+    ma10Sec.setData(calculateMA(candlestickData, 10));
 
     return () => {
       chart.remove();
