@@ -2,10 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, install dependencies
+First, install dependencies and set your environment variables.
+
+Install Dependencies.
 
 ```bash
 npm install --force
+```
+
+Set Your Environment Variables.
+refer to: https://www.binance.com/en/support/faq/how-to-create-api-keys-on-binance-360002502072
+
+```
+#.env
+API_URL = "https://api.binance.com"
+API_KEY = ""
+API_SECRET = ""
 ```
 
 Second, run the development server:
