@@ -55,9 +55,10 @@ const FinancialChart = () => {
 
   useEffect(() => {
     if (!coinName || isHovering) return;
+    getTradeList();
     const Interval = setInterval(() => {
       getTradeList();
-    }, 2000);
+    }, 10000);
     return () => {
       clearInterval(Interval);
     };
@@ -65,23 +66,27 @@ const FinancialChart = () => {
   }, [width, coinName, isHovering]);
 
   useEffect(() => {
+    if (tradelist?.length < 1) return;
+
     const chart = createChart(chartContainerRef.current, {
       width: width > 1290 ? width / 2 - 100 : width - 300,
       height: 600,
       layout: {
         backgroundColor: "#000000",
-        textColor: "#d1d4dc",
+        textColor: "black",
       },
       grid: {
         vertLines: { color: "#334158" },
         horzLines: { color: "#334158" },
       },
       crosshair: { mode: 1 },
-      priceScale: { borderColor: "#485c7b" },
+      priceScale: {
+        borderColor: "#485c7b",
+        mode: 1, // 오른쪽에 숫자를 표시
+      },
       timeScale: { borderColor: "#485c7b" },
     });
 
-    // Preprocess trade data into candlestick format
     const candlestickData = preprocessTrades(tradelist);
 
     // Add candlestick series
@@ -95,44 +100,69 @@ const FinancialChart = () => {
 
     candleSeries.setData(candlestickData);
 
-    // Optionally, add moving average lines
-    const ma1Sec = chart.addLineSeries({ color: "#ffeb3b", lineWidth: 2 });
-    const ma5Sec = chart.addLineSeries({ color: "#ff5722", lineWidth: 2 });
-    const ma10Sec = chart.addLineSeries({ color: "#9c27b0", lineWidth: 2 });
+    // Tooltip 생성
+    const container = chartContainerRef.current;
+    const tooltip = document.createElement("div");
+    tooltip.style = `
+    position: absolute;
+    display: none;
+    border: 1px solid #ccc;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+  `;
+    container.appendChild(tooltip);
+    const coinLabel = document.createElement("div");
+    coinLabel.style = `
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 1000;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  `;
+    coinLabel.innerText = coinName || "Loading...";
+    container.appendChild(coinLabel);
 
-    // Moving Averages
-    const calculateMA = (candles, periodSeconds) => {
-      const maData = [];
-      const periodMs = periodSeconds * 1000; // Convert seconds to milliseconds
-
-      for (let i = 0; i < candles.length; i++) {
-        const endTime = candles[i].time * 1000; // Convert seconds to milliseconds
-        const startTime = endTime - periodMs;
-
-        // Find candles within the time window
-        const relevantCandles = candles.filter(
-          (candle) =>
-            candle.time * 1000 >= startTime && candle.time * 1000 <= endTime
-        );
-
-        if (relevantCandles.length > 0) {
-          const avg =
-            relevantCandles.reduce((sum, candle) => sum + candle.close, 0) /
-            relevantCandles.length;
-
-          maData.push({ time: candles[i].time, value: avg });
-        }
+    chart.subscribeCrosshairMove((param) => {
+      if (
+        param === undefined ||
+        param.time === undefined ||
+        param.seriesPrices?.size === 0
+      ) {
+        tooltip.style.display = "none";
+        return;
       }
 
-      return maData;
-    };
+      const price = param.seriesPrices?.get(candleSeries);
+      if (price) {
+        const lastClose = candlestickData[candlestickData.length - 1].close;
+        const percentChange = (((price - lastClose) / lastClose) * 100).toFixed(
+          2
+        );
 
-    ma1Sec.setData(calculateMA(candlestickData, 1));
-    ma5Sec.setData(calculateMA(candlestickData, 5));
-    ma10Sec.setData(calculateMA(candlestickData, 10));
+        tooltip.style.display = "block";
+        tooltip.style.left = `${param.point.x + 15}px`;
+        tooltip.style.top = `${param.point.y}px`;
+        tooltip.innerHTML = `
+        <div>Price: ${price.toFixed(2)}</div>
+        <div style="color: ${
+          percentChange >= 0 ? "#26a69a" : "#ef5350"
+        }">Change: ${percentChange}%</div>
+      `;
+      }
+    });
 
     return () => {
       chart.remove();
+      container.removeChild(tooltip);
+      container.removeChild(coinLabel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tradelist]);
